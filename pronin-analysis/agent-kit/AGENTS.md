@@ -2,7 +2,7 @@ This file provides guidance to Agents when working with code in this repository.
 
 # What this repo is
 
-An agent-driven video production workspace, not an application. Videos (mostly Russian-language vertical Reels, 1080×1920 @ 30 FPS) are built from local assets with Remotion or HyperFrames, reviewed in Storybook, and rendered with ffmpeg-backed tooling. There is no app-level build, lint, or test suite; each sub-project (`style-review`, `projects/*`) has its own `package.json`.
+An agent-driven video production workspace, not an application. Videos (Russian-language Instagram Reels, 9:16, 1080×1920; FPS set by the workflow, 30 by default) are built from local assets with Remotion or HyperFrames, reviewed in Storybook, and rendered with ffmpeg-backed tooling. There is no app-level build, lint, or test suite; each sub-project (`style-review`, `projects/*`) has its own `package.json`.
 
 Read the matching file in `workflows/` before starting any video. It is the authoritative process for that video type and overrides generic skill guidance. Skills live in `.agents/skills/<name>/SKILL.md` (≈60 of them: remotion-*, hyperframes-*, storybook, deepgram-transcribe, remove-image-background, icons, extracting-design-styles, humanizer-ru, media-use, etc.). Subagents live in `.agents/agents/<name>.md`; their Codex copies are generated into the `video-agents` skill by `scripts/sync-agents.py`, and that skill's SKILL.md is the roster.
 
@@ -11,6 +11,34 @@ Read `workflows/_shared/production-qa.md` before creating or revising any video.
 Before sending any video to the user — a test scene or a final render — run the selected workflow's creative self-review on the **encoded MP4** (contact sheets, seam frames, word-timing check), fix what it finds, then send. Technical checks (build, ffprobe, `hyperframes check`) do not prove the video is good. Track every user/reviewer request of the current round in the project's `media/change-log.md` and verify each item on a frame of the MP4 before reporting it as done.
 
 Specify all animation timings in seconds/ms in plans, specs and messages. Use frame counts only together with an explicit fps: reference measurements may come from a 30 fps source while the project renders at 60 fps.
+
+# Channel defaults — apply to every video, every workflow
+
+These are the owner's standing requirements. They apply automatically to every new video
+and every revision without asking; only a direct instruction from the user for a specific
+video overrides them.
+
+- **Format: Instagram Reels, 9:16, 1080×1920.** Never produce another aspect ratio unless
+  the user asks for it in that request. Keep semantic content inside the Reels safe zones
+  (see cross-cutting rules): Instagram UI covers the bottom and right edge.
+- **Channel:** name `milanko.ai`, logo `assets/logos/milanko.ai/logo.jpg`. Always use this
+  local file as the channel logo/avatar. Never generate, redraw, or substitute a placeholder;
+  if the file is missing, stop the CTA work and report it instead of inventing one.
+- **Subscribe CTA at the end of every video.** The last scene asks the viewer to subscribe
+  to `milanko.ai`:
+  - a spoken line in the video's voice (default wording: «Подписывайся — разбираю эй-ай и айти
+    простыми словами: что это такое и зачем оно нужно»; adapt only to the topic if needed,
+    keep "эй-ай"/"айти" pronunciation);
+  - a channel card with the logo, the name `milanko.ai`, and a readable one-line promise
+    (≥27 px at 1080 width), plus a visible subscribe action (e.g. a cursor clicks
+    «подписаться» and it changes to «вы подписаны ✓»);
+  - the CTA scene lasts as long as its measured spoken line plus its tail, never
+    truncated; motion continues to the final frame; styled in the selected workflow's
+    visual language.
+  - The CTA line is part of the script and is approved together with it; it is not a reason
+    to re-ask for approval on its own.
+- Verify all three in the encoded MP4 before sending: 1080×1920 via ffprobe, the correct
+  logo file on the last scene, and the CTA line audible in the final audio.
 
 # Workflow selection and reuse
 
@@ -88,6 +116,7 @@ examples; caching never replaces preflight, per-video QA, or service failure rul
 | `sfx/epidemic/` | Sound effects downloaded via the Epidemic Sound MCP. |
 | `stickers/<subject>/` | Transparent PNG or SVG stickers (e.g. `bill-gates/`, `windows/`). |
 | `icons/` | Icons, including `icons/animated/`. |
+| `logos/<brand>/` | Brand logos. `logos/milanko.ai/logo.jpg` is the owner's channel logo, used in every CTA. |
 | `backgrounds/static/<ratio>/`, `backgrounds/animated/<ratio>/` | Reusable backgrounds, grouped by aspect ratio (`9:16`, `16:9`). |
 | `transitions/<ratio>/` | Ready-made transition clips. Use only when they match the style. |
 | `animated-emojies/` | Short animated emoji clips (`.gif.mp4`). |
