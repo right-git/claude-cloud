@@ -10,6 +10,13 @@
 | `workflows/continuous-ui-tech-explainer.md` | `workflows/continuous-ui-tech-explainer.md` |
 | `workflows/_shared/production-qa.md` | `workflows/_shared/production-qa.md` |
 | `workflows/continuous-ui-tech-explainer/reference/` | `workflows/continuous-ui-tech-explainer/reference/` |
+| `skills/workflow-builder/` (папка целиком) | `.agents/skills/workflow-builder/` |
+| `scripts/qa/layout-lint.js` | `scripts/qa/layout-lint.js` |
+
+Скилл `workflow-builder` требует скилл `grilling` в `.agents/skills/grilling/` (если он
+установлен как `grill-me` — переименовать папку или поправить имя в
+`workflow-builder/SKILL.md`, этап 3). После копирования выполнить `scripts/link-skills.sh`,
+чтобы скилл появился у Codex.
 
 Проверка после копирования: `continuous-ui-tech-explainer.md` начинается со строки
 `# Workflow: Continuous UI Tech Explainer` и заканчивается разделом `## 13. Переиспользование`;

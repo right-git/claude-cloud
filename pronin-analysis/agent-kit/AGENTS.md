@@ -70,6 +70,12 @@ choice, offer the matching workflows and wait before production. If none fits,
 explain that a suitable workflow must be created first and help define and create
 it. Do not force a mismatched workflow. A generic video skill is not a substitute.
 
+Creating a new workflow — from a reference video, from the user's description, or both
+(«сделай workflow», «новый формат», «хочу такие же видео как у …») — always goes through
+the `workflow-builder` skill. That skill requires an interview through the `grilling`
+skill; a workflow written without a completed grilling round and a pilot is a draft and
+is not used for full videos.
+
 Each workflow must have a companion reusable skill in `.agents/skills/`, linked from
 the workflow. Use `workflow-kit` for shared inventory and reuse conventions; use the
 format's companion skill for its components, commands and checks. The workflow owns
