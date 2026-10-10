@@ -22,7 +22,7 @@ description: Компоненты, скрипты фактов и проверк
 
 ## Скрипты фактов
 
-- Подсчёт: `.venv/bin/python scripts/quran/count.py --data assets/data/quran/quran-morphology.txt <cmd>`
+- Подсчёт: `.venv/bin/python workflows/quran-data-essay/scripts/count.py --data assets/data/quran/quran-morphology.txt <cmd>`
   - `selftest` — запускать перед каждым подсчётом; все строки `ok`.
   - `verses`, `words`.
   - `match --lemma L [--root R] [--pos N|V|P] [--feat X ...] [--not-feat X ...] --name NAME
@@ -32,10 +32,10 @@ description: Компоненты, скрипты фактов и проверк
   - Единица — слово (`сура:аят:слово`); в JSON также число стихов с вхождениями.
 - Сборка `media/facts.json`: объединить JSON подсчётов + метаданные (даты оси, номера стихов
   для карточек). Композиция читает числа только отсюда.
-- `scripts/quran/quote.py` (создать при первом ролике): `quote.py S:A --lang ar|en` → текст
+- `workflows/quran-data-essay/scripts/quote.py` (создать при первом ролике): `quote.py S:A --lang ar|en` → текст
   из закреплённого файла; `quote.py --check media/scene-plan.md` → побайтовая сверка всех
-  цитат. После проверки на пилоте — закрепить в `scripts/quran/`.
-- `scripts/quran/verify_facts.py` (создать при первом ролике): перечитывает `methods.md`,
+  цитат. Лежит в папке workflow, в общий `scripts/` не переносить.
+- `workflows/quran-data-essay/scripts/verify_facts.py` (создать при первом ролике): перечитывает `methods.md`,
   пересчитывает, сравнивает с `facts.json`; второй способ подсчёта — поиск поверхностных
   форм из CSV в `quran-uthmani.txt` (нормализовать диакритику одинаково); печатает таблицу
   расхождений; код возврата ≠ 0 при любом расхождении.

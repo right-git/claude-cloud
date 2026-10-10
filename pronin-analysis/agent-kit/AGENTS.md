@@ -62,7 +62,8 @@ Record the selection in the project's `media/workflow.json` with a repo-relative
 
 Requests to create a top-3/5/10 or ranking video (including Russian «топ», «рейтинг»
 and English “top”, “ranking”) route to `workflows/top-ranking.md` when they describe
-the video's format. Load `top-ranking` and `workflow-kit`; extract the topic, explicit
+the video's format. Load its companion skill (`workflows/top-ranking/SKILL.md` once moved
+there, see the layout rule below) and `workflow-kit`; extract the topic, explicit
 count and language from the request and use the workflow's remaining defaults.
 For example, «Создай видео “Топ-10 фильмов с Райаном Гослингом” на русском языке»
 is sufficient to start the top-ranking workflow, including service preflight,
@@ -76,7 +77,7 @@ it. Do not force a mismatched workflow. A generic video skill is not a substitut
 
 Requests for data-driven videos about the Quran (word counts, revelation order, surah
 structure; «ролик про Коран», «посчитай слова в Коране», «как Frames of Noor») route to
-`workflows/quran-data-essay.md` with its companion skill `quran-data-essay`. Its §F (facts)
+`workflows/quran-data-essay.md` with its companion skill `workflows/quran-data-essay/SKILL.md`. Its §F (facts)
 is mandatory and blocks rendering until every claim is verified.
 
 Creating a new workflow — from a reference video, from the user's description, or both
@@ -85,13 +86,28 @@ the `workflow-builder` skill. That skill requires an interview through the `gril
 skill; a workflow written without a completed grilling round and a pilot is a draft and
 is not used for full videos.
 
-Each workflow must have a companion reusable skill in `.agents/skills/`, linked from
-the workflow. Use `workflow-kit` for shared inventory and reuse conventions; use the
-format's companion skill for its components, commands and checks. The workflow owns
-requirements and approval gates; skills implement them without duplicating policy.
-New workflows ship with a small working, verified starter kit. Existing workflows
-without one receive a companion kit when next used, before production, rather than
-through a speculative bulk migration. The first implementation is `top-ranking`.
+Each workflow must have a companion skill, linked from the workflow. **Everything that
+belongs to one workflow lives in that workflow's folder**, not in the shared folders:
+```
+workflows/<name>.md            the workflow (policy, gates, invariants)
+workflows/<name>/SKILL.md      its companion skill (components, commands, checks)
+workflows/<name>/scripts/      scripts only this format uses
+workflows/<name>/decisions.md  decision log; reference/ — reference breakdowns
+```
+`.agents/skills/` holds only universal skills — ones that more than one workflow, or work
+outside any workflow, can use (Remotion, HyperFrames, Deepgram, icons, workflow-kit,
+workflow-builder…). `scripts/<area>/` likewise holds only shared scripts
+(e.g. `scripts/qa/layout-lint.js`). When a workflow needs a skill, read its
+`workflows/<name>/SKILL.md` directly; it is not registered in `.agents/skills/` and
+`scripts/link-skills.sh` does not link it. If a format-specific part later proves useful to
+a second workflow, move it out to the shared folder then — not in advance.
+
+Use `workflow-kit` for shared inventory and reuse conventions; use the format's companion
+skill for its components, commands and checks. The workflow owns requirements and approval
+gates; skills implement them without duplicating policy. New workflows ship with a small
+working, verified starter kit. Existing workflows without one receive a companion kit when
+next used, before production, rather than through a speculative bulk migration. The first
+implementation is `top-ranking`.
 
 Before creating anything, inventory the existing reusable assets and components.
 Reuse verified backgrounds, typography tokens, ranking tables, captions, transitions
@@ -112,9 +128,9 @@ examples; caching never replaces preflight, per-video QA, or service failure rul
 
 | Path | Purpose | Rules |
 |---|---|---|
-| `workflows/` | One markdown file per video type describing the full production process, plus a same-named folder for that format's spec (zones, tokens, previews). | Read the matching workflow before starting a video. It overrides generic skill advice. |
-| `scripts/` | Reusable scripts and shared gotchas, grouped by area (`reference-explainer/`, `remotion/`). | Anything needed more than once goes here. One-off, per-video tooling stays in `projects/remotion/<project>/tools/`. |
-| `.agents/skills/<name>/SKILL.md` | Agent skills (Remotion, HyperFrames, Storybook, Deepgram, background removal, icons, style extraction, text humanizing, stealth browser, etc.). | Invoke by name. |
+| `workflows/` | One markdown file per video type describing the full production process, plus a same-named folder with everything specific to that format: its companion `SKILL.md`, `scripts/`, spec (zones, tokens, previews), `decisions.md`, `reference/`. | Read the matching workflow before starting a video. It overrides generic skill advice. Format-specific skills and scripts go here, never into `.agents/skills/` or `scripts/`. |
+| `scripts/` | Reusable scripts and shared gotchas used by more than one workflow, grouped by area (`qa/`, `remotion/`). | Anything needed by several formats goes here; a script for one format lives in `workflows/<name>/scripts/`. One-off, per-video tooling stays in `projects/remotion/<project>/tools/`. |
+| `.agents/skills/<name>/SKILL.md` | Universal agent skills only (Remotion, HyperFrames, Storybook, Deepgram, background removal, icons, style extraction, text humanizing, stealth browser, workflow-kit, workflow-builder, etc.). | Invoke by name. A skill tied to one workflow does not belong here — it is that workflow's `workflows/<name>/SKILL.md`. |
 | `.agents/agents/<name>.md` | Subagent definitions (researcher, trender, scriptwriter, reference-breaker, assetfinder, proof-hunter, uieditor, sound-designer, qachecker). `README.md` there holds the exchange protocol. | A workflow names which agents to use; an agent never names a workflow. Delegate only for isolated context, fresh eyes or parallelism — otherwise do it inline. Edit the `.md`, then run `scripts/link-skills.sh` to relink and regenerate the Codex twins. |
 | `.agents/mcp/<name>/` | Locally hosted MCP servers, one directory each. Currently `stealth/`: an anti-detect Firefox browser (uv project with `uv.lock` and a launcher). | Cross-platform by design. Start through `uv run` as configured in `.mcp.json`; see the README inside for setup. Read the `stealth-browser` skill before using its tools. |
 | `docs/` | Plans and design specs in markdown (`docs/superpowers/{plans,specs}/`). | Write new plans and specs here, dated `YYYY-MM-DD-<topic>.md`. |

@@ -2,7 +2,7 @@
 
 Статус: черновик (grilling пройден 10.10.2026; пилот не сделан — полноценные ролики не делать
 до пилота, см. §10).
-Companion skill: `.agents/skills/quran-data-essay/SKILL.md`.
+Companion skill: `workflows/quran-data-essay/SKILL.md` (скрипты — `workflows/quran-data-essay/scripts/`).
 Решения и источники: `workflows/quran-data-essay/decisions.md`.
 Референс: `workflows/quran-data-essay/reference/` (`README.md` — сводка, `videos/v1–v3.md`).
 Универсальный стандарт: [`_shared/production-qa.md`](_shared/production-qa.md) — часть A
@@ -225,14 +225,14 @@ revealed in the order you read it.», «The longest surah is built like a mirror
 реальное число.
 
 **F3. Каждое число — из скрипта.** Все числа на экране импортируются композицией из
-`media/facts.json`, который генерирует `scripts/quran/count.py` (или другой скрипт в
-`scripts/quran/`). Ручного ввода чисел в сценах нет (проверка: в коде сцен нет числовых
+`media/facts.json`, который генерирует `workflows/quran-data-essay/scripts/count.py` (или другой скрипт в
+`workflows/quran-data-essay/scripts/`). Ручного ввода чисел в сценах нет (проверка: в коде сцен нет числовых
 литералов в текстовых узлах, кроме дат оси из `facts.json`). Для каждого счёта сохраняется
 CSV всех вхождений (`media/counts/<name>.csv`); точки на панели подсвечиваются ровно по нему.
 Перед любым подсчётом — `count.py selftest` (должен быть `ok` по всем строкам).
 
 **F4. Цитаты дословно и по ключу.** Арабский и перевод берутся из закреплённых файлов по
-ключу `сура:аят` скриптом (`scripts/quran/quote.py`), а не перепечатываются. Скобки,
+ключу `сура:аят` скриптом (`workflows/quran-data-essay/scripts/quote.py`), а не перепечатываются. Скобки,
 пунктуация и архаизмы Yusuf Ali сохраняются. Обрезка цитаты допустима только по границе
 фразы и обозначается «…». Проверка: побайтовое сравнение текста сцены с файлом.
 Подсвеченное слово в переводе должно соответствовать подсвеченному арабскому слову
@@ -315,10 +315,10 @@ edition>. Method: <короткое правило или ссылка>». По�
 
 ## 13. Переиспользование
 
-- `scripts/quran/count.py` — подсчёты (лемма/корень/часть речи/род/число, CSV вхождений,
+- `workflows/quran-data-essay/scripts/count.py` — подсчёты (лемма/корень/часть речи/род/число, CSV вхождений,
   selftest).
-- `scripts/quran/quote.py`, `verify_facts.py` — создаются при первом ролике по контракту
-  companion-скилла и переносятся сюда после проверки.
+- `workflows/quran-data-essay/scripts/quote.py`, `verify_facts.py` — создаются при первом
+  ролике по контракту companion-скилла и остаются в папке workflow.
 - Компоненты HyperFrames (VerseGrid, Counter, Compare, VerseCard, Timeline, RingBars,
   Sweep, EndCard) — `projects/hyperframes/_shared/quran-data-essay/` после пилота.
 - Стиль: `assets/styles/quran-data-essay/DESIGN.md` + `preview.png` (токены из §3).

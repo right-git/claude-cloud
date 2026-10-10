@@ -1,7 +1,7 @@
 # Workflow: <Название формата>
 
 Статус: черновик | проверен пилотом <дата>
-Companion skill: `.agents/skills/<slug>/SKILL.md`.
+Companion skill: `workflows/<slug>/SKILL.md` (скрипты формата — `workflows/<slug>/scripts/`).
 Решения и их источники: `workflows/<slug>/decisions.md`.
 Референс: `workflows/<slug>/reference/` (`README.md` — сводка, `videos/vN.md` — разборы) | нет.
 Универсальный стандарт и проверки: [`_shared/production-qa.md`](_shared/production-qa.md).

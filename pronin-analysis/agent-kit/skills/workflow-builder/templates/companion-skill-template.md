@@ -5,6 +5,9 @@ description: Компоненты, команды и проверки для р�
 
 # <Название> — companion skill
 
+Лежит в `workflows/<slug>/SKILL.md`, не в `.agents/skills/` (там только универсальные
+скиллы). Скрипты формата — `workflows/<slug>/scripts/`.
+
 Политика (правила, согласования, инварианты) — в `workflows/<slug>.md`. Здесь только
 реализация. При конфликте прав workflow.
 

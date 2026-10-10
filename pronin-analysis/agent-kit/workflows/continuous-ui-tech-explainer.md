@@ -1,6 +1,7 @@
 # Workflow: Continuous UI Tech Explainer
 
-Companion skill: `.agents/skills/continuous-ui-tech-explainer/SKILL.md`.
+Companion skill: `workflows/continuous-ui-tech-explainer/SKILL.md` (перенесён из `.agents/skills/` —
+см. INSTALL.md; если ещё лежит там, перенести перед работой).
 Универсальный стандарт и проверки: [`_shared/production-qa.md`](_shared/production-qa.md)
 (часть A «Видео, а не презентация» U01–U16, ошибки G01–G44, проверки по этапам).
 Референс стиля (разбор 5 роликов pronin.media): `workflows/continuous-ui-tech-explainer/reference/`

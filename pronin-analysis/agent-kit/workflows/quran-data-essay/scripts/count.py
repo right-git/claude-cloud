@@ -2,7 +2,7 @@
 """Reproducible Quran counts over a pinned morphology file (Quranic Arabic Corpus v0.4 format).
 
 Every number shown in a quran-data-essay video must come from this script (or another
-script in scripts/quran/) run against a pinned data file, never typed by hand.
+script in workflows/quran-data-essay/scripts/) run against a pinned data file, never typed by hand.
 
 Data line format (tab-separated):  sura:ayah:word:segment  form  POS  TAG|TAG|LEM:x|ROOT:y
 Unit of counting is the WORD (sura:ayah:word), not the segment: a word matches when any
