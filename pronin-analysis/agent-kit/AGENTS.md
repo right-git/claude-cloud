@@ -24,6 +24,10 @@ These are the owner's standing requirements. They apply automatically to every n
 and every revision without asking; only a direct instruction from the user for a specific
 video overrides them.
 
+Exception: `workflows/quran-data-essay.md` belongs to a separate English-language channel.
+Its §1–§2 (language, channel, end card) replace this section for videos under that
+workflow; the milanko.ai logo, CTA and Russian defaults are not used there.
+
 - **Format: Instagram Reels, 9:16, 1080×1920.** Never produce another aspect ratio unless
   the user asks for it in that request. Keep semantic content inside the Reels safe zones
   (see cross-cutting rules): Instagram UI covers the bottom and right edge.
@@ -69,6 +73,11 @@ If multiple workflows plausibly fit and the request/project does not resolve the
 choice, offer the matching workflows and wait before production. If none fits,
 explain that a suitable workflow must be created first and help define and create
 it. Do not force a mismatched workflow. A generic video skill is not a substitute.
+
+Requests for data-driven videos about the Quran (word counts, revelation order, surah
+structure; «ролик про Коран», «посчитай слова в Коране», «как Frames of Noor») route to
+`workflows/quran-data-essay.md` with its companion skill `quran-data-essay`. Its §F (facts)
+is mandatory and blocks rendering until every claim is verified.
 
 Creating a new workflow — from a reference video, from the user's description, or both
 («сделай workflow», «новый формат», «хочу такие же видео как у …») — always goes through

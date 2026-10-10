@@ -13,6 +13,20 @@
 | `skills/workflow-builder/` (папка целиком) | `.agents/skills/workflow-builder/` |
 | `scripts/qa/layout-lint.js` | `scripts/qa/layout-lint.js` |
 
+| `workflows/quran-data-essay.md` + папка `workflows/quran-data-essay/` | те же пути |
+| `skills/quran-data-essay/` | `.agents/skills/quran-data-essay/` |
+| `scripts/quran/count.py` | `scripts/quran/count.py` |
+
+Данные для `quran-data-essay` в репозиторий не кладутся — скачать в `assets/data/quran/`:
+```bash
+curl -L -o assets/data/quran/quran-morphology.txt \
+  https://raw.githubusercontent.com/mustafa0x/quran-morphology/master/quran-morphology.txt
+sha256sum assets/data/quran/quran-morphology.txt   # 742bfac59941b2cb09736d5b7aae694af50792261fb8450cbf6afafcc340645f
+.venv/bin/python scripts/quran/count.py --data assets/data/quran/quran-morphology.txt selftest
+```
+Остальные файлы (Tanzil Uthmani, Yusuf Ali, метаданные) — по списку в
+`skills/quran-data-essay/SKILL.md`, с записью в `assets/data/quran/SOURCES.md`.
+
 Скилл `workflow-builder` требует скилл `grilling` в `.agents/skills/grilling/` (если он
 установлен как `grill-me` — переименовать папку или поправить имя в
 `workflow-builder/SKILL.md`, этап 3). После копирования выполнить `scripts/link-skills.sh`,
