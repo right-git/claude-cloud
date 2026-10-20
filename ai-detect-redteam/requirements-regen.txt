@@ -1,0 +1,7 @@
+# Watermark-regeneration attack (regen.py). Install on your Mac, not in the cloud session.
+torch>=2.2
+diffusers>=0.27
+transformers>=4.38
+accelerate>=0.27
+pillow>=10
+pillow-heif>=0.15
