@@ -20,13 +20,48 @@ Red-team тест детектора AI-изображений (хакатон h
 5. Bayer RGGB мозаика → шум сенсора (Poisson-Gaussian + PRNU) → демозаикинг
 6. ISP: тон-кривая, unsharp mask, JPEG 4:2:0
 
+Пресет по умолчанию — `light` (на шаблоне: 99.2% → **0.3%** в hivedetect.ai).
+Остальные: `medium` → `strong` → `heavy` (сильнее обработка, ниже качество).
+
+## Установка
+
+Нужен Python 3.9+.
+
 ```bash
-pip install numpy pillow
-python3 camerafy.py samples/template.jpg out --sweep --seed 1   # все пресеты
-python3 camerafy.py samples/template.jpg out.jpg --preset strong --passes 2
+git clone https://github.com/right-git/claude-cloud.git
+cd claude-cloud
+git checkout claude/peaceful-cori-mbh8lr
+cd ai-detect-redteam
+
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-Пресеты: `light` → `medium` → `strong` → `heavy` (больше шума/ресемплинга = ниже скор, хуже качество).
+## Конвертация
+
+Одно фото:
+```bash
+python3 camerafy.py photo.png photo_out.jpg
+```
+
+Вся папка (jpg/jpeg/png/webp/bmp/tif) → в другую папку, имена сохраняются, на выходе `.jpg`:
+```bash
+python3 camerafy.py photos/ photos_out/
+python3 camerafy.py photos/ photos_out/ -r          # вместе с подпапками
+```
+
+Другие опции:
+```bash
+python3 camerafy.py photos/ out/ --preset medium     # другой пресет
+python3 camerafy.py photos/ out/ --sweep             # все 4 пресета: name_light.jpg, name_medium.jpg, ...
+python3 camerafy.py photo.png out.jpg --seed 1       # воспроизводимый результат (шаблон делали с --seed 1)
+python3 camerafy.py photo.png out.jpg --passes 2     # прогнать пайплайн дважды
+```
+
+Битые/нечитаемые файлы в папке пропускаются с пометкой `[fail]`, остальные обрабатываются.
+Шум случайный: если какое-то фото получило высокий скор, перезапусти с другим `--seed`
+или возьми `--preset medium`.
 
 ## Как подбирать
 1. Загрузить `out/*.jpg` в hivedetect.ai, записать скор для каждого пресета.

@@ -18,7 +18,8 @@ attacks the pixel statistics instead:
   8. JPEG 4:2:0 at camera-like quality
 
 Usage:
-  python3 camerafy.py in.jpg out.jpg --preset medium
+  python3 camerafy.py in.jpg out.jpg                # default preset: light
+  python3 camerafy.py photos/ photos_out/           # whole folder (-r for subfolders)
   python3 camerafy.py in.jpg outdir/ --sweep     # writes every preset, for A/B testing
 """
 import argparse
@@ -26,7 +27,7 @@ import io
 import os
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 PRESETS = {
     "light":  dict(rot=0.4, crop=0.01, scale=0.97, fft=0.5, ca=0.0006, blur=0.35, vign=0.05,
@@ -190,27 +191,63 @@ def save_jpeg(img, path, q):
         f.write(buf.getvalue())
 
 
+IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
+
+
+def process(path, out_path, p, passes, seed):
+    img = ImageOps.exif_transpose(Image.open(path))  # keep phone photos upright
+    for i in range(passes):
+        img = camerafy(img, p, None if seed is None else seed + i)
+    save_jpeg(img, out_path, p["q"])
+    return img.size
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("input")
-    ap.add_argument("output")
-    ap.add_argument("--preset", choices=PRESETS, default="medium")
+    ap.add_argument("input", help="image file or folder with images")
+    ap.add_argument("output", help="output .jpg (for a single file) or output folder")
+    ap.add_argument("--preset", choices=PRESETS, default="light")
     ap.add_argument("--sweep", action="store_true", help="write every preset into output dir")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--passes", type=int, default=1, help="repeat the pipeline N times")
+    ap.add_argument("-r", "--recursive", action="store_true", help="also process subfolders")
     args = ap.parse_args()
 
-    src = Image.open(args.input)
-    jobs = PRESETS.items() if args.sweep else [(args.preset, PRESETS[args.preset])]
+    presets = list(PRESETS.items()) if args.sweep else [(args.preset, PRESETS[args.preset])]
+
+    if os.path.isdir(args.input):
+        files = []
+        for root, dirs, names in os.walk(args.input):
+            files += [os.path.join(root, n) for n in sorted(names)
+                      if os.path.splitext(n)[1].lower() in IMAGE_EXTS]
+            if not args.recursive:
+                break
+        if not files:
+            raise SystemExit(f"no images found in {args.input}")
+        ok = 0
+        for f in sorted(files):
+            rel = os.path.splitext(os.path.relpath(f, args.input))[0]
+            for name, p in presets:
+                suffix = f"_{name}" if args.sweep else ""
+                out = os.path.join(args.output, rel + suffix + ".jpg")
+                os.makedirs(os.path.dirname(out), exist_ok=True)
+                try:
+                    size = process(f, out, p, args.passes, args.seed)
+                    print(f"[ok] {f} -> {out} {size}")
+                    ok += 1
+                except Exception as e:  # keep going on broken files
+                    print(f"[fail] {f}: {e}")
+        print(f"done: {ok} image(s) written to {args.output}")
+        return
+
     if args.sweep:
         os.makedirs(args.output, exist_ok=True)
-    for name, p in jobs:
-        img = src
-        for i in range(args.passes):
-            img = camerafy(img, p, None if args.seed is None else args.seed + i)
-        path = os.path.join(args.output, f"{name}.jpg") if args.sweep else args.output
-        save_jpeg(img, path, p["q"])
-        print(f"{name}: {path} {img.size}")
+    for name, p in presets:
+        out = os.path.join(args.output, f"{name}.jpg") if args.sweep else args.output
+        if os.path.dirname(out):
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+        size = process(args.input, out, p, args.passes, args.seed)
+        print(f"{name}: {out} {size}")
 
 
 if __name__ == "__main__":
