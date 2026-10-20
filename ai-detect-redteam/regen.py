@@ -42,6 +42,27 @@ def pick_device():
     return "cpu"
 
 
+def load_vae(device):
+    """~320 MB standalone VAE. Encode->decode lossily rebuilds the pixels, which
+    erases fragile watermarks. Far lighter than a full diffusion model."""
+    from diffusers import AutoencoderKL
+    dtype = torch.float16 if device == "cuda" else torch.float32
+    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse", torch_dtype=dtype).to(device)
+    vae.eval()
+    return vae
+
+
+def vae_roundtrip(vae, img, device):
+    import numpy as np
+    a = torch.from_numpy(np.asarray(img, np.float32) / 127.5 - 1.0)
+    a = a.permute(2, 0, 1).unsqueeze(0).to(device, vae.dtype)
+    with torch.no_grad():
+        lat = vae.encode(a).latent_dist.mean
+        out = vae.decode(lat).sample
+    out = ((out.squeeze(0).permute(1, 2, 0).float().cpu().numpy() + 1.0) * 127.5).clip(0, 255)
+    return Image.fromarray(out.astype("uint8"))
+
+
 def load_pipe(model, device):
     from diffusers import AutoPipelineForImage2Image
     # fp16 on CUDA; fp32 on MPS/CPU (MPS fp16 can produce NaNs in the SDXL VAE)
@@ -104,9 +125,26 @@ def main():
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--sweep", action="store_true",
                     help="write strengths 0.25/0.35/0.45/0.55 side by side")
+    ap.add_argument("--vae-only", action="store_true",
+                    help="light mode: ~320 MB VAE round-trip instead of a full diffusion model")
     args = ap.parse_args()
 
     device = pick_device()
+    if args.vae_only:
+        print(f"device={device}  mode=vae-only (~320 MB)")
+        vae = load_vae(device)
+        for src, rel in iter_inputs(args.input):
+            base = ImageOps.exif_transpose(Image.open(src)).convert("RGB")
+            small = to_mult8(base, args.max_side)
+            res = vae_roundtrip(vae, small, device).resize(base.size, Image.LANCZOS)
+            out = args.output if not os.path.isdir(args.input) else \
+                os.path.join(args.output, os.path.splitext(rel)[0] + ".png")
+            if os.path.dirname(out):
+                os.makedirs(os.path.dirname(out), exist_ok=True)
+            res.save(out)
+            print(f"[ok] {src} -> {out}")
+        return
+
     is_turbo = "turbo" in args.model.lower()
     print(f"device={device}  model={args.model}  turbo={is_turbo}")
     pipe = load_pipe(args.model, device)

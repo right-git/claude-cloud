@@ -38,6 +38,10 @@ PRESETS = {
                    bayer=True, iso=0.014, read=3.0, prnu=0.008, sharpen=100, q=85),
     "heavy":  dict(rot=1.5, crop=0.04, scale=0.75, fft=0.9, ca=0.0020, blur=0.9, vign=0.12,
                    bayer=True, iso=0.022, read=4.0, prnu=0.010, sharpen=110, q=82),
+    # watermark scrub: strong local warp + heavy spectral/sensor rework, no ML download
+    "scrub":  dict(rot=0.8, crop=0.02, scale=0.88, fft=0.9, ca=0.0012, blur=0.5, vign=0.06,
+                   bayer=True, iso=0.012, read=2.5, prnu=0.008, sharpen=85, q=90,
+                   warp=2.2, warp_smooth=10),
 }
 
 
@@ -161,11 +165,35 @@ def tone_curve(a):
     return np.clip(s, 0, 1) * 255.0
 
 
+def elastic_warp(a, amp, smooth, rng):
+    """Smooth random local warp. Desynchronises spatial watermarks (SynthID-style)
+    whose detector relies on pixel alignment, with almost no visible change."""
+    h, w = a.shape[:2]
+    def field():
+        n = rng.normal(0, 1, (h, w)).astype(np.float32)
+        n = np.asarray(Image.fromarray(((n * 40) + 128).clip(0, 255).astype(np.uint8))
+                       .filter(ImageFilter.GaussianBlur(smooth)), np.float32)
+        n = (n - n.mean())
+        return n / (np.abs(n).max() + 1e-6) * amp
+    dx, dy = field(), field()
+    yy, xx = np.meshgrid(np.arange(h), np.arange(w), indexing="ij")
+    sx = np.clip(xx + dx, 0, w - 1.001).astype(np.float32)
+    sy = np.clip(yy + dy, 0, h - 1.001).astype(np.float32)
+    x0, y0 = np.floor(sx).astype(int), np.floor(sy).astype(int)
+    x1, y1 = x0 + 1, y0 + 1
+    fx, fy = (sx - x0)[..., None], (sy - y0)[..., None]
+    out = (a[y0, x0] * (1 - fx) * (1 - fy) + a[y0, x1] * fx * (1 - fy)
+           + a[y1, x0] * (1 - fx) * fy + a[y1, x1] * fx * fy)
+    return out
+
+
 def camerafy(img, p, seed=None):
     rng = np.random.default_rng(seed)
     img = img.convert("RGB")  # pixels only: drops C2PA/EXIF/XMP/ICC
     img = geometric(img, p["rot"], p["crop"], p["scale"], rng)
     a = np.asarray(img, np.float32)
+    if p.get("warp", 0):
+        a = elastic_warp(a, p["warp"], p.get("warp_smooth", 12), rng)
     a = suppress_spectral_peaks(a, p["fft"])
     a = chromatic_aberration(a, p["ca"])
     a = np.asarray(Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
